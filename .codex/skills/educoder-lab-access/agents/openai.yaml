@@ -1,0 +1,4 @@
+interface:
+  display_name: "Educoder Lab Access"
+  short_description: "Access Educoder OS lab APIs"
+  default_prompt: "Use $educoder-lab-access to inspect my Educoder OS labs and task terminal access."

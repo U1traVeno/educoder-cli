@@ -1,0 +1,25 @@
+# Local build outputs
+/bin/
+/dist/
+/build/
+
+# Local Educoder/browser session material
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.jar
+*cookie*
+*cookies*
+*session*
+credentials.json
+educoder-credentials.json
+
+# Temporary outputs and logs
+/tmp/
+*.log
+*.out
+
+# OS/editor noise
+.DS_Store
+.idea/
+.vscode/
