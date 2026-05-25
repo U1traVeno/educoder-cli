@@ -1,4 +1,0 @@
-interface:
-  display_name: "Educoder Lab Runner"
-  short_description: "Complete labs and write reports"
-  default_prompt: "Use $educoder-lab-runner to complete the next Educoder OS lab and write its report."
