@@ -1,6 +1,6 @@
 # Educoder OS Lab Helper
 
-Small Go CLI for accessing an Educoder OS lab course without a browser dependency. It helps Codex inspect lab metadata, read task descriptions, start/resume lab tasks, execute commands in the lab VM through Educoder's SSH gateway, and trigger the official evaluation endpoint.
+Small Go CLI for accessing an Educoder OS lab course without a browser dependency. It helps coding agents inspect lab metadata, read task descriptions, start/resume lab tasks, execute commands in the lab VM through Educoder's SSH gateway, and trigger the official evaluation endpoint.
 
 This repository intentionally does not store cookies, passwords, session tokens, API responses, or build artifacts.
 
@@ -109,7 +109,9 @@ The helper intentionally does not hardcode a course id or classroom code. `labs`
 
 ## Project Skills
 
-Project-local Codex skills are included under `.codex/skills/`:
+Project-local skills are included for both Codex and Claude Code:
 
+- Codex reads skills from `.codex/skills/`.
+- Claude Code reads skills from `.claude/skills/`.
 - `educoder-lab-access` documents platform access, VM operations, file transfer, and official evaluation/status checks.
 - `educoder-lab-runner` documents the higher-level workflow for completing one experiment under `labs/labx/` and writing a detailed lab report.

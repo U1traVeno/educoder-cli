@@ -8,7 +8,7 @@ Write in Chinese unless the user or course requires another language. Follow the
 
 Use this structure for personal experiments 1 and 2. Match the practical, human-written style of the provided sample: include a clear topic introduction, detailed implementation/debugging narrative, core code excerpts, result analysis, and a substantial improvement/summary section. Do not reduce it to only principle/method/result.
 
-```markdown
+````markdown
 # 实验<编号>课程设计报告：<实验题目>
 
 ## 一、题目介绍
@@ -78,13 +78,13 @@ flowchart TD
 ## 七、程序完整代码
 
 个人实验如果代码规模较小，可以贴完整代码；如果代码规模很大，优先贴新增/修改的完整核心文件，并说明未改动的大型文件不全文粘贴。
-```
+````
 
 ## Group Educoder Experiment 3
 
 Use this structure for group experiment 3, namely the Head Educoder platform experiments 1-17. The whole group submits one combined report, and every small experiment must identify its main contributor. When generating a report for a single Educoder lab, still include the group fields and the small-experiment main-contributor placeholder.
 
-```markdown
+````markdown
 # 分组实验3课程设计报告：头歌平台实验1-17
 
 ## （1）实验题目
@@ -142,7 +142,7 @@ Use this structure for group experiment 3, namely the Head Educoder platform exp
 ## （7）程序代码
 
 列出每一个修改过文件的完整文件路径、修改内容，并添加必要注释。Educoder 分组实验不需要粘贴整个未改动工程，重点写清楚所有修改文件和关键代码。
-```
+````
 
 ## Writing Rules
 

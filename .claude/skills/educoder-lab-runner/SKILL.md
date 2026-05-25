@@ -1,6 +1,6 @@
 ---
 name: educoder-lab-runner
-description: Complete an Educoder OS course experiment end to end and write its course-design report. Use when the user asks Codex to finish a lab, continue the next lab, create a labs/labx workspace, inspect lab requirements, download or work with the lab VM/source tree, build and test the experiment locally or in Docker, prepare the required result artifact, trigger official evaluation, confirm completion status, or write/update a report using the course-required personal/group report format.
+description: Complete an Educoder OS course experiment end to end and write its course-design report. Use when the user asks Claude Code to finish a lab, continue the next lab, create a labs/labx workspace, inspect lab requirements, download or work with the lab VM/source tree, build and test the experiment locally or in Docker, prepare the required result artifact, trigger official evaluation, confirm completion status, or write/update a report using the course-required personal/group report format.
 ---
 
 # Educoder Lab Runner
