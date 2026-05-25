@@ -1,4 +1,4 @@
 interface:
   display_name: "Educoder Lab Access"
-  short_description: "Access Educoder OS lab APIs"
-  default_prompt: "Use $educoder-lab-access to inspect my Educoder OS labs and task terminal access."
+  short_description: "Access, sync, manage VM pods, and submit Educoder OS labs"
+  default_prompt: "Use $educoder-lab-access to inspect my Educoder OS labs, manage lab VM access, sync files, submit a task, and check official status."

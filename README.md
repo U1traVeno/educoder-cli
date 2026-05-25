@@ -52,11 +52,44 @@ go run ./cmd/educoder vm-exec \
   --game-id <numeric-game-id> \
   --homework-id <homework-id> \
   --cmd 'pwd; ls -la'
-go run ./cmd/educoder api-post \
-  --path '/api/tasks/<game-id>/game_build.json?homework_common_id=<homework-id>' \
-  --body '{}'
-go run ./cmd/educoder api-get \
-  --path '/api/tasks/<game-id>/game_status.json?homework_common_id=<homework-id>'
+go run ./cmd/educoder vm-download \
+  --myshixun <myshixun-id> \
+  --env <env-id> \
+  --tab 4 \
+  --game-id <numeric-game-id> \
+  --homework-id <homework-id> \
+  --remote /data/workspace/myshixun \
+  --local ../labs/labx/repo
+go run ./cmd/educoder vm-upload \
+  --myshixun <myshixun-id> \
+  --env <env-id> \
+  --tab 4 \
+  --game-id <numeric-game-id> \
+  --homework-id <homework-id> \
+  --local ../labs/labx/repo/result.txt \
+  --remote /data/workspace/myshixun/result.txt
+go run ./cmd/educoder update-file \
+  --myshixun <myshixun-id> \
+  --game-id <numeric-game-id> \
+  --homework-id <homework-id> \
+  --path result.txt \
+  --local ../labs/labx/repo/result.txt
+go run ./cmd/educoder evaluate-file \
+  --task <game-id> \
+  --myshixun <myshixun-id> \
+  --env <env-id> \
+  --game-id <numeric-game-id> \
+  --homework-id <homework-id> \
+  --path result.txt \
+  --local ../labs/labx/repo/result.txt
+go run ./cmd/educoder reset-pod \
+  --myshixun <myshixun-id> \
+  --env <env-id> \
+  --tab 4 \
+  --game-id <numeric-game-id> \
+  --homework-id <homework-id>
+go run ./cmd/educoder submit --task <game-id> --homework-id <homework-id>
+go run ./cmd/educoder status --task <game-id> --homework-id <homework-id>
 ```
 
 Use `--json` before a subcommand for raw JSON where supported:
@@ -74,6 +107,9 @@ The helper intentionally does not hardcode a course id or classroom code. `labs`
 - `vm-exec` obtains temporary SSH gateway credentials from Educoder and passes the password to `expect` through an environment variable; it does not print the password itself.
 - Do not commit local API dumps, generated credential files, curl cookie jars, terminal logs containing credentials, or compiled binaries.
 
-## Project Skill
+## Project Skills
 
-A project-local Codex skill is included under `.codex/skills/educoder-lab-access`. It documents the verified workflow and endpoint notes for future Codex sessions working inside this repository.
+Project-local Codex skills are included under `.codex/skills/`:
+
+- `educoder-lab-access` documents platform access, VM operations, file transfer, and official evaluation/status checks.
+- `educoder-lab-runner` documents the higher-level workflow for completing one experiment under `labs/labx/` and writing a detailed lab report.

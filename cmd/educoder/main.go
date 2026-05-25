@@ -159,6 +159,34 @@ func run() error {
 			return errors.New("active-pod requires --myshixun, --env, and --game-id")
 		}
 		return c.activePod(*myshixun, *env, *tab, *gameID, *homeworkID, extras)
+	case "reset-pod":
+		fs := flag.NewFlagSet("reset-pod", flag.ExitOnError)
+		myshixun := fs.String("myshixun", "", "myshixun identifier")
+		env := fs.Int("env", 0, "shixun_environment_id")
+		tab := fs.Int("tab", 4, "tab_type")
+		gameID := fs.Int("game-id", 0, "numeric game id")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		extras := multiFlag{}
+		fs.Var(&extras, "extra", "additional request parameter as key=value; may be repeated")
+		_ = fs.Parse(args[1:])
+		if *myshixun == "" {
+			return errors.New("reset-pod requires --myshixun")
+		}
+		return c.podAction(http.MethodGet, *myshixun, "reset_pod", *env, *tab, *gameID, *homeworkID, extras)
+	case "delete-pod":
+		fs := flag.NewFlagSet("delete-pod", flag.ExitOnError)
+		myshixun := fs.String("myshixun", "", "myshixun identifier")
+		env := fs.Int("env", 0, "shixun_environment_id")
+		tab := fs.Int("tab", 4, "tab_type")
+		gameID := fs.Int("game-id", 0, "numeric game id")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		extras := multiFlag{}
+		fs.Var(&extras, "extra", "additional request parameter as key=value; may be repeated")
+		_ = fs.Parse(args[1:])
+		if *myshixun == "" {
+			return errors.New("delete-pod requires --myshixun")
+		}
+		return c.podAction(http.MethodPost, *myshixun, "force_delete_pod", *env, *tab, *gameID, *homeworkID, extras)
 	case "proxy-list":
 		fs := flag.NewFlagSet("proxy-list", flag.ExitOnError)
 		task := fs.String("task", "", "task/game identifier")
@@ -176,6 +204,66 @@ func run() error {
 			return errors.New("port-proxy requires --task and a valid --port")
 		}
 		return c.portProxy(*task, *port)
+	case "submit":
+		fs := flag.NewFlagSet("submit", flag.ExitOnError)
+		task := fs.String("task", "", "task/game identifier")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		_ = fs.Parse(args[1:])
+		if *task == "" {
+			return errors.New("submit requires --task")
+		}
+		return c.submit(*task, *homeworkID)
+	case "status":
+		fs := flag.NewFlagSet("status", flag.ExitOnError)
+		task := fs.String("task", "", "task/game identifier")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		_ = fs.Parse(args[1:])
+		if *task == "" {
+			return errors.New("status requires --task")
+		}
+		return c.status(*task, *homeworkID)
+	case "update-file":
+		fs := flag.NewFlagSet("update-file", flag.ExitOnError)
+		myshixun := fs.String("myshixun", "", "myshixun identifier")
+		gameID := fs.Int("game-id", 0, "numeric game id")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		remotePath := fs.String("path", "", "repository-relative file path")
+		localPath := fs.String("local", "", "local file to read as content")
+		content := fs.String("content", "", "literal file content")
+		tab := fs.Int("tab", 1, "tab_type")
+		evaluate := fs.Int("evaluate", 0, "evaluate flag sent to Educoder")
+		ip := fs.String("ip", "", "optional VM/container ip")
+		_ = fs.Parse(args[1:])
+		if *myshixun == "" || *gameID == 0 || *remotePath == "" {
+			return errors.New("update-file requires --myshixun, --game-id, and --path")
+		}
+		if (*localPath == "") == (*content == "") {
+			return errors.New("update-file requires exactly one of --local or --content")
+		}
+		return c.updateFile(*myshixun, *gameID, *homeworkID, *remotePath, *localPath, *content, *tab, *evaluate, *ip)
+	case "evaluate-file":
+		fs := flag.NewFlagSet("evaluate-file", flag.ExitOnError)
+		task := fs.String("task", "", "task/game identifier")
+		myshixun := fs.String("myshixun", "", "myshixun identifier")
+		env := fs.Int("env", 0, "shixun_environment_id")
+		tab := fs.Int("tab", 1, "tab_type")
+		gameID := fs.Int("game-id", 0, "numeric game id")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		remotePath := fs.String("path", "", "repository-relative file path")
+		localPath := fs.String("local", "", "local file to read as content")
+		content := fs.String("content", "", "literal file content")
+		challengeID := fs.String("challenge-id", "", "challenge id")
+		currentUserID := fs.String("current-user-id", "", "current Educoder user id")
+		extras := multiFlag{}
+		fs.Var(&extras, "extra", "additional build extras as key=value; may be repeated")
+		_ = fs.Parse(args[1:])
+		if *task == "" || *myshixun == "" || *env == 0 || *gameID == 0 || *remotePath == "" {
+			return errors.New("evaluate-file requires --task, --myshixun, --env, --game-id, and --path")
+		}
+		if (*localPath == "") == (*content == "") {
+			return errors.New("evaluate-file requires exactly one of --local or --content")
+		}
+		return c.evaluateFile(*task, *myshixun, *env, *tab, *gameID, *homeworkID, *remotePath, *localPath, *content, *challengeID, *currentUserID, extras)
 	case "api-get":
 		fs := flag.NewFlagSet("api-get", flag.ExitOnError)
 		path := fs.String("path", "", "API path beginning with /api/")
@@ -208,6 +296,44 @@ func run() error {
 			return errors.New("vm-exec requires --myshixun, --env, and --game-id")
 		}
 		return c.vmExec(*myshixun, *env, *tab, *gameID, *homeworkID, extras, *command)
+	case "vm-download":
+		fs := flag.NewFlagSet("vm-download", flag.ExitOnError)
+		myshixun := fs.String("myshixun", "", "myshixun identifier")
+		env := fs.Int("env", 0, "shixun_environment_id")
+		tab := fs.Int("tab", 4, "tab_type")
+		gameID := fs.Int("game-id", 0, "numeric game id")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		remotePath := fs.String("remote", "", "remote file or directory path to download")
+		localPath := fs.String("local", "", "local destination path")
+		extras := multiFlag{}
+		fs.Var(&extras, "extra", "additional query parameter as key=value; may be repeated")
+		_ = fs.Parse(args[1:])
+		if *myshixun == "" || *env == 0 || *gameID == 0 {
+			return errors.New("vm-download requires --myshixun, --env, and --game-id")
+		}
+		if *remotePath == "" || *localPath == "" {
+			return errors.New("vm-download requires --remote and --local")
+		}
+		return c.vmDownload(*myshixun, *env, *tab, *gameID, *homeworkID, extras, *remotePath, *localPath)
+	case "vm-upload":
+		fs := flag.NewFlagSet("vm-upload", flag.ExitOnError)
+		myshixun := fs.String("myshixun", "", "myshixun identifier")
+		env := fs.Int("env", 0, "shixun_environment_id")
+		tab := fs.Int("tab", 4, "tab_type")
+		gameID := fs.Int("game-id", 0, "numeric game id")
+		homeworkID := fs.String("homework-id", "", "homework_common_id")
+		localPath := fs.String("local", "", "local file or directory path to upload")
+		remotePath := fs.String("remote", "", "remote destination path")
+		extras := multiFlag{}
+		fs.Var(&extras, "extra", "additional query parameter as key=value; may be repeated")
+		_ = fs.Parse(args[1:])
+		if *myshixun == "" || *env == 0 || *gameID == 0 {
+			return errors.New("vm-upload requires --myshixun, --env, and --game-id")
+		}
+		if *localPath == "" || *remotePath == "" {
+			return errors.New("vm-upload requires --local and --remote")
+		}
+		return c.vmUpload(*myshixun, *env, *tab, *gameID, *homeworkID, extras, *localPath, *remotePath)
 	default:
 		usage()
 		return fmt.Errorf("unknown command %q", args[0])
@@ -240,11 +366,19 @@ func usage() {
   educoder [global flags] start --shixun <shixun-id>
   educoder [global flags] task --task <game-id>
   educoder [global flags] active-pod --myshixun <myshixun-id> --env <env-id> --tab 4 --game-id <numeric-game-id>
+  educoder [global flags] reset-pod --myshixun <myshixun-id> --env <env-id> --tab 4 --game-id <numeric-game-id> --homework-id <homework-id>
+  educoder [global flags] delete-pod --myshixun <myshixun-id> --env <env-id> --tab 4 --game-id <numeric-game-id> --homework-id <homework-id>
   educoder [global flags] proxy-list --task <game-id>
   educoder [global flags] port-proxy --task <game-id> --port 22
+  educoder [global flags] submit --task <game-id> --homework-id <homework-id>
+  educoder [global flags] status --task <game-id> --homework-id <homework-id>
+  educoder [global flags] update-file --myshixun <myshixun-id> --game-id <numeric-game-id> --homework-id <homework-id> --path result.txt --local ./labs/labx/repo/result.txt
+  educoder [global flags] evaluate-file --task <game-id> --myshixun <myshixun-id> --env <env-id> --game-id <numeric-game-id> --homework-id <homework-id> --path result.txt --local ./labs/labx/repo/result.txt
   educoder [global flags] api-get --path /api/users/get_user_info.json
   educoder [global flags] api-post --path /api/tasks/<task>/proxy_list --body '{}'
   educoder [global flags] vm-exec --myshixun <myshixun-id> --env <env-id> --tab 4 --game-id <numeric-game-id> --homework-id <homework-id> --cmd 'pwd'
+  educoder [global flags] vm-download --myshixun <myshixun-id> --env <env-id> --tab 4 --game-id <numeric-game-id> --homework-id <homework-id> --remote /data/workspace/myshixun --local ./labs/labx/repo
+  educoder [global flags] vm-upload --myshixun <myshixun-id> --env <env-id> --tab 4 --game-id <numeric-game-id> --homework-id <homework-id> --local ./labs/labx/result.txt --remote /data/workspace/myshixun/result.txt
 
 Global flags default to the OS course and a local CLI credentials file.
 `)
@@ -829,6 +963,56 @@ func (c *client) activePod(myshixun string, env, tab, gameID int, homeworkID str
 	return printJSON(m)
 }
 
+func (c *client) podAction(method, myshixun, action string, env, tab, gameID int, homeworkID string, extras []string) error {
+	if err := c.ensureLogin(); err != nil {
+		return err
+	}
+	values := url.Values{}
+	values.Set("zzud", c.login)
+	if env > 0 {
+		values.Set("shixun_environment_id", strconv.Itoa(env))
+	}
+	if tab > 0 {
+		values.Set("tab_type", strconv.Itoa(tab))
+	}
+	if gameID > 0 {
+		values.Set("game_id", strconv.Itoa(gameID))
+	}
+	if homeworkID != "" {
+		values.Set("homework_common_id", homeworkID)
+	}
+	for _, item := range extras {
+		key, value, _ := strings.Cut(item, "=")
+		values.Set(key, value)
+	}
+	path := fmt.Sprintf("/api/myshixuns/%s/%s.json", url.PathEscape(myshixun), action)
+	var body any
+	if method == http.MethodGet {
+		path += "?" + values.Encode()
+	} else {
+		body = map[string]any{}
+		for key, value := range values {
+			if len(value) > 0 {
+				body.(map[string]any)[key] = value[len(value)-1]
+			}
+		}
+	}
+	var m map[string]any
+	if err := c.signedRequest(method, path, body, &m); err != nil {
+		return err
+	}
+	if c.cfg.jsonOut {
+		return printJSON(m)
+	}
+	fmt.Printf("%s myshixun=%s status=%s message=%s\n",
+		strings.ReplaceAll(action, "_", "-"),
+		myshixun,
+		numberString(m, "status"),
+		stringValue(m, "message"),
+	)
+	return nil
+}
+
 func (c *client) proxyList(task string) error {
 	if err := c.ensureLogin(); err != nil {
 		return err
@@ -851,6 +1035,177 @@ func (c *client) portProxy(task string, port int) error {
 		return err
 	}
 	return printJSON(m)
+}
+
+func (c *client) submit(task, homeworkID string) error {
+	if err := c.ensureLogin(); err != nil {
+		return err
+	}
+	var m map[string]any
+	if err := c.signedRequest(http.MethodPost, taskActionPath(task, "game_build", homeworkID), map[string]any{}, &m); err != nil {
+		return err
+	}
+	if c.cfg.jsonOut {
+		return printJSON(m)
+	}
+	res, _ := m["res"].(map[string]any)
+	data, _ := res["data"].(map[string]any)
+	fmt.Printf(
+		"submit task=%s status=%s had_done=%s message=%s queue=%s wait=%s\n",
+		task,
+		numberString(m, "status"),
+		numberString(m, "had_done"),
+		firstNonEmpty(stringValue(data, "msg"), stringValue(res, "msg")),
+		numberString(data, "queueCode"),
+		numberString(data, "waitNum"),
+	)
+	return nil
+}
+
+func (c *client) status(task, homeworkID string) error {
+	if err := c.ensureLogin(); err != nil {
+		return err
+	}
+	var m map[string]any
+	if err := c.signedRequest(http.MethodGet, taskActionPath(task, "game_status", homeworkID), nil, &m); err != nil {
+		return err
+	}
+	if c.cfg.jsonOut {
+		return printJSON(m)
+	}
+	fmt.Printf(
+		"status task=%s status=%s had_done=%s grade=%s sets_error_count=%s\n",
+		task,
+		numberString(m, "status"),
+		numberString(m, "had_done"),
+		numberString(m, "grade"),
+		numberString(m, "sets_error_count"),
+	)
+	if output := stringValue(m, "last_compile_output"); output != "" {
+		fmt.Printf("last_compile_output=%s\n", output)
+	}
+	for i, testSet := range arrayValue(m, "test_sets") {
+		ts, _ := testSet.(map[string]any)
+		fmt.Printf("test_set[%d] result=%s compile_success=%s time=%s mem=%s\n",
+			i,
+			boolString(ts, "result"),
+			numberString(ts, "compile_success"),
+			numberString(ts, "ts_time"),
+			numberString(ts, "ts_mem"),
+		)
+	}
+	return nil
+}
+
+func taskActionPath(task, action, homeworkID string) string {
+	path := fmt.Sprintf("/api/tasks/%s/%s.json", url.PathEscape(task), action)
+	if homeworkID == "" {
+		return path
+	}
+	q := url.Values{}
+	q.Set("homework_common_id", homeworkID)
+	return path + "?" + q.Encode()
+}
+
+func (c *client) updateFile(myshixun string, gameID int, homeworkID, remotePath, localPath, literalContent string, tab, evaluate int, ip string) error {
+	m, err := c.updateFileRequest(myshixun, gameID, homeworkID, remotePath, localPath, literalContent, tab, evaluate, ip)
+	if err != nil {
+		return err
+	}
+	if c.cfg.jsonOut {
+		return printJSON(m)
+	}
+	fmt.Printf("update-file myshixun=%s path=%s status=%s message=%s\n",
+		myshixun,
+		remotePath,
+		numberString(m, "status"),
+		stringValue(m, "message"),
+	)
+	return nil
+}
+
+func (c *client) updateFileRequest(myshixun string, gameID int, homeworkID, remotePath, localPath, literalContent string, tab, evaluate int, ip string) (map[string]any, error) {
+	if err := c.ensureLogin(); err != nil {
+		return nil, err
+	}
+	content := literalContent
+	if localPath != "" {
+		data, err := os.ReadFile(localPath)
+		if err != nil {
+			return nil, err
+		}
+		content = string(data)
+	}
+	path := fmt.Sprintf("/api/myshixuns/%s/update_file.json", url.PathEscape(myshixun))
+	body := map[string]any{
+		"path":     remotePath,
+		"evaluate": evaluate,
+		"content":  content,
+		"game_id":  gameID,
+		"tab_type": tab,
+	}
+	if homeworkID != "" {
+		body["homework_common_id"] = homeworkID
+	}
+	if ip != "" {
+		body["ip"] = ip
+	}
+	var m map[string]any
+	if err := c.signedRequest(http.MethodPost, path, body, &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *client) evaluateFile(task, myshixun string, env, tab, gameID int, homeworkID, remotePath, localPath, literalContent, challengeID, currentUserID string, extras []string) error {
+	save, err := c.updateFileRequest(myshixun, gameID, homeworkID, remotePath, localPath, literalContent, tab, 1, "")
+	if err != nil {
+		return err
+	}
+	content, _ := save["content"].(map[string]any)
+	buildExtras := map[string]any{
+		"exercise_id":          "",
+		"question_id":          "",
+		"challenge_id":         challengeID,
+		"subject_id":           "",
+		"homework_common_id":   homeworkID,
+		"competition_entry_id": "",
+		"commitID":             stringValue(content, "commitID"),
+		"currentUserId":        currentUserID,
+	}
+	for _, item := range extras {
+		key, value, _ := strings.Cut(item, "=")
+		buildExtras[key] = value
+	}
+	body := map[string]any{
+		"sec_key":               stringValue(save, "sec_key"),
+		"resubmit":              stringValue(save, "resubmit"),
+		"first":                 1,
+		"content_modified":      save["content_modified"],
+		"shixun_environment_id": env,
+		"tab_type":              tab,
+		"extras":                buildExtras,
+	}
+	var build map[string]any
+	if err := c.signedRequest(http.MethodPost, taskActionPath(task, "game_build", homeworkID), body, &build); err != nil {
+		return err
+	}
+	if c.cfg.jsonOut {
+		return printJSON(map[string]any{"save": save, "build": build})
+	}
+	res, _ := build["res"].(map[string]any)
+	data, _ := res["data"].(map[string]any)
+	fmt.Printf(
+		"evaluate-file task=%s status=%s had_done=%s message=%s queue=%s wait=%s commit=%s\n",
+		task,
+		numberString(build, "status"),
+		numberString(build, "had_done"),
+		firstNonEmpty(stringValue(data, "msg"), stringValue(res, "msg")),
+		numberString(data, "queueCode"),
+		numberString(data, "waitNum"),
+		stringValue(content, "commitID"),
+	)
+	return nil
 }
 
 func (c *client) rawAPI(method, path, bodyText string) error {
@@ -913,6 +1268,86 @@ expect eof`
 	return cmd.Run()
 }
 
+func (c *client) vmDownload(myshixun string, env, tab, gameID int, homeworkID string, extras []string, remotePath, localPath string) error {
+	if _, err := exec.LookPath("expect"); err != nil {
+		return errors.New("vm-download requires /usr/bin/expect or another expect executable")
+	}
+	if _, err := exec.LookPath("scp"); err != nil {
+		return errors.New("vm-download requires scp on PATH")
+	}
+	if err := os.MkdirAll(filepath.Dir(localPath), 0755); err != nil {
+		return err
+	}
+	pod, err := c.startPod(myshixun, env, tab, gameID, homeworkID, extras)
+	if err != nil {
+		return err
+	}
+	if pod.Data.SSHAddress == "" || pod.Data.Port == "" || pod.Data.Username == "" || pod.Data.Password == "" {
+		return fmt.Errorf("start.json did not return SSH credentials: status=%d message=%s", pod.Status, pod.Message)
+	}
+	script := `set timeout -1
+spawn scp -r -P $env(EDU_PORT) -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $env(EDU_USER)@$env(EDU_HOST):$env(EDU_REMOTE) $env(EDU_LOCAL)
+expect {
+  "*assword:*" {
+    send -- "$env(EDU_PASS)\r"
+    exp_continue
+  }
+  eof
+}`
+	cmd := exec.Command("expect", "-c", script)
+	cmd.Env = append(os.Environ(),
+		"EDU_HOST="+pod.Data.SSHAddress,
+		"EDU_PORT="+pod.Data.Port,
+		"EDU_USER="+pod.Data.Username,
+		"EDU_PASS="+pod.Data.Password,
+		"EDU_REMOTE="+remotePath,
+		"EDU_LOCAL="+localPath,
+	)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func (c *client) vmUpload(myshixun string, env, tab, gameID int, homeworkID string, extras []string, localPath, remotePath string) error {
+	if _, err := exec.LookPath("expect"); err != nil {
+		return errors.New("vm-upload requires /usr/bin/expect or another expect executable")
+	}
+	if _, err := exec.LookPath("scp"); err != nil {
+		return errors.New("vm-upload requires scp on PATH")
+	}
+	if _, err := os.Stat(localPath); err != nil {
+		return err
+	}
+	pod, err := c.startPod(myshixun, env, tab, gameID, homeworkID, extras)
+	if err != nil {
+		return err
+	}
+	if pod.Data.SSHAddress == "" || pod.Data.Port == "" || pod.Data.Username == "" || pod.Data.Password == "" {
+		return fmt.Errorf("start.json did not return SSH credentials: status=%d message=%s", pod.Status, pod.Message)
+	}
+	script := `set timeout -1
+spawn scp -r -P $env(EDU_PORT) -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $env(EDU_LOCAL) $env(EDU_USER)@$env(EDU_HOST):$env(EDU_REMOTE)
+expect {
+  "*assword:*" {
+    send -- "$env(EDU_PASS)\r"
+    exp_continue
+  }
+  eof
+}`
+	cmd := exec.Command("expect", "-c", script)
+	cmd.Env = append(os.Environ(),
+		"EDU_HOST="+pod.Data.SSHAddress,
+		"EDU_PORT="+pod.Data.Port,
+		"EDU_USER="+pod.Data.Username,
+		"EDU_PASS="+pod.Data.Password,
+		"EDU_LOCAL="+localPath,
+		"EDU_REMOTE="+remotePath,
+	)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
 func (c *client) startPod(myshixun string, env, tab, gameID int, homeworkID string, extras []string) (*podStartResponse, error) {
 	if err := c.ensureLogin(); err != nil {
 		return nil, err
@@ -963,7 +1398,10 @@ func numberString(m map[string]any, key string) string {
 	}
 	switch v := m[key].(type) {
 	case float64:
-		return strconv.FormatInt(int64(v), 10)
+		if v == float64(int64(v)) {
+			return strconv.FormatInt(int64(v), 10)
+		}
+		return strconv.FormatFloat(v, 'f', -1, 64)
 	case int:
 		return strconv.Itoa(v)
 	case json.Number:
@@ -978,6 +1416,26 @@ func numberString(m map[string]any, key string) string {
 func arrayValue(m map[string]any, key string) []any {
 	v, _ := m[key].([]any)
 	return v
+}
+
+func boolString(m map[string]any, key string) string {
+	if m == nil {
+		return ""
+	}
+	v, ok := m[key].(bool)
+	if !ok {
+		return ""
+	}
+	return strconv.FormatBool(v)
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func statusString(v any) string {
@@ -1004,15 +1462,6 @@ func courseCode(course map[string]any) string {
 	for i, part := range parts {
 		if part == "classrooms" && i+1 < len(parts) {
 			return parts[i+1]
-		}
-	}
-	return ""
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		if value != "" {
-			return value
 		}
 	}
 	return ""
